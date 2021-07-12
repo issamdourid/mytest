@@ -1,0 +1,70 @@
+# 13-07-2021 : Rapport
+## ISSAM DOURID
+
+
+### Idée et but:
+Pour tout ce qui suit , on désigne par système l'ensemble guide d'onde (WR340) et Stubs (3 Stubs Tuner) excité à 2.45GHz à 1kW.
+
+L’idée principale est de décrire via un modèle la variation du coefficient de réflexion du système devant la variation des longueurs d'insertion des Stubs. En d'autres termes , est ce que je peux prédire le S11 du système à partir de la combinaison des 3 longueurs des Stubs. L’établissement de cette relation permettra de matcher le réacteur : La mesure du S11 du réacteur avec la charge permettra d'aller chercher son conjugué en changeant les longueurs des Stubs via le modèle cherché.
+
+D'un point de vu fréquentiel, le système est un dispositif à 2 ports (*Port 1 :* Source , *Port 2 :* Sortie vers charge) symétrique (Excitation unidirectionnelle). La distance entre 2 Stubs successives est de 3λ/8 pour maximiser l’efficacité du Tuning, et l'insertion de chaque Stub ne dépasse pas λ/4 ≈ 28mm pour garder l'effet capacitif, par pas de 1mm.
+
+Pour faire, j'ai divisé le système en 3 sous système : le guide d'onde et un seul Stub qui varie à la fois. Pour chaque sous système, il est question d’établir la même relation : la réponse en S en fonction de la longueur d’insertion du Stub dynamique. L'avantage par rapport à garder le système en entier avec les 3 Stubs, est de pouvoir:
+
+ 1. Réduire considérablement le temps de simulation;
+ 2. Voir l'effet individuel de chaque Stub sur le système;
+ 3. Avoir la relation désirée ( matrice S = *f*(insertion) ) de chaque sous modèle par un Curve Fitting, ce qui est difficile en considérant directement le système avec les 3 Stubs .
+
+Le système consiste ainsi d'une connexion en cascade entre éléments passives, où on peut utiliser des formules explicites impliquant directement les paramètres S. Ainsi, on pourra exprimer la relation finale désirée ( matrice S = *f*(3 insertions) ) du système ayant les 3 Stubs dynamiques en s'appuyant sur les relations des sous systèmes, et la formulation d'une connexion en cascade de 3 réseaux à  2 ports.
+
+### L'approche suivie:
+####  Pour les sous systèmes: 
+##### Comsol:
+Chaque sous système est simulé sur *Comsol* en variant la longueur du Stub dynamique entre [5,20]mm par un pas de 1mm , et en gardant les 2 autres Stubs fixes à 5mm. Ce choix d'intervalle et de valeurs permet d'obtenir une réponse en S sans discontinuités ou changement brusque de valeurs . La simulation sur *Comsol* permettra d'avoir les données nécessaires pour faire du *Curve Fitting* sur *Matlab*. 
+
+On s’intéresse dans chaque sous système à S11 et S21 , à ce que les sous systèmes restent symétriques ( S11=S22 , S21=S12). On reprend ces 2 paramètres de *Comsol* sous formes de réelle et imaginaire, et également sous forme de module et phase pour des fins de comparaisons. 
+
+Les données générées pour chaque sous système serviront comme expliqués pour faire du *Curve Fitting* sur *Matlab* , mais également serviront comme données de comparaison avec les données du modèle final développée, si on considère qu'on varie un seul Stub entre [5,20]mm et que les 2 autres sont fixes à 5mm.
+
+##### Matlab:
+On charge les données des parties réelles et imaginaires de S11 et S21 des 3 sous modèle sur *Matlab*, ce qui donne au total 12 courbes à Fitter. on cherche a avoir le minimum d'erreur entre les données de Comsol et le Fitting qui utilise une fonction polynomiale. Une erreur de mois de 0.0001 peut être atteinte en considérant un polynôme d'ordre 15 pour l'ensemble des données. Ainsi, on peut exprimer le S11 et le S21 pour chaque sous système par la somme des fonctions polynomiales obtenues pour le réel et imaginaires, ce qui donne 6 fonctions polynomiales au final :
+
+ 1. Pour le 1er sous système: 
+
+> S11 = *fct*(insertion) ;
+>  S21 = *fct*(insertion).
+
+ 2. Pour le 2eme sous système: 
+
+> S11 = *fct*(insertion) ;
+>  S21 = *fct*(insertion).
+
+ 3. Pour le 3eme sous système: 
+
+> S11 = *fct*(insertion) ;
+>  S21 = *fct*(insertion).
+
+Ayant donc la réponse en S des 3 sous systèmes chacun à la fois , on peut formuler la réponse en S de leurs connections. La formule utilisée décrit la réponse en S *(on s’intéresse qu'au S11 cette fois-ci : la réflexion du système)* de 3 sous réseaux à 2 ports connectées, dans le contexte spécifique des composants micro-ondes, notamment un guide d'onde avec des composants passifs, comme un iris ou un Stub.
+
+La formule du S11 du système fait appel aux différents S11 et  S21 des sous systèmes qu'on a formulé par des polynômes. La formulation va permettre de différencier les insertions de chaque sous modèle, ainsi l'expression finale devient : 
+
+> S11 = *fct* (insertion1,insertion2,insertion3)
+
+où :
+
+ -  insertion1 est l'argument de la fonction S11 et S21 pour le 1er sous modèle;
+ -  insertion2 est l'argument de la fonction S11 et S21 pour le 2eme sous modèle;
+ -  insertion3 est l'argument de la fonction S11 et S21 pour le 3eme sous modèle.
+
+### Résultats:
+#### Pour chaque sous système:
+Chaque résultat superpose le *Fitting* sur *Matlab* aux données de simulation de *Comsol* pour comparer le modèle à la simulation.
+
+ - Sous système 1:
+ - Sous système 2:
+ - Sous système 3:
+#### Pour le système:
+ - Mise en cascade des 3 sous système:
+
+### Conclusion:
+
